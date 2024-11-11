@@ -1,118 +1,111 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import * as React from 'react';
+import { View, Text, Button, Alert } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Switch, TamaguiProvider } from 'tamagui';
+import { Switch as RNSwitch } from 'react-native';
+import appConfig from './tamagui.config';
+import { useEffect, useLayoutEffect } from 'react';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+function HomeScreen({navigation}: {navigation: any}) {
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  const navigate = (screen:string) => {
+    const startTime = performance.now(); // Start timing
+    navigation.navigate(screen, {startTime})
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  }
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Text>Tamagui Switch Performance Demo</Text>
+      <Button
+        title="Show Tamagui Switches with animation prop"
+        onPress={() =>{
+          navigate('TamaguiAnimationSwitchesScreen')
+        }}
+      />
+      <Button
+        title="Show Tamagui Switches without animation prop"
+        onPress={() =>{
+          navigate('TamaguiNoAnimationSwitchesScreen')
+        }}
+      />
+      <Button
+        title="Show React Native Switches "
+        onPress={() =>{
+          navigate('ReactNativeSwitchesScreen')
+        }}
+      />
     </View>
   );
 }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+const SWITCHES = 50
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+const style = { flex: 1, flexDirection:'row', flexWrap:'wrap', backgroundColor:'grey' } as const;
+
+
+const alertNavigationTime = (startTime: number) => {
+  const endTime = performance.now(); 
+  Alert.alert('useLayoutEffect',(((endTime - startTime)).toFixed(2) + 'ms'))
+}
+function TamaguiAnimationSwitchesScreen({route}) {
+  useLayoutEffect(() => {
+    alertNavigationTime(route.params.startTime)
+  }, [])
+  return (
+    <View style={style}>
+      {[...Array(SWITCHES)].map((_, index) => (
+        <Switch animation={'quick'} key={index} />
+      ))}
+      </View>
+  );
+}
+function TamaguiNoAnimationSwitchesScreen({route}) {
+  useLayoutEffect(() => {
+    alertNavigationTime(route.params.startTime)
+  }, [])
+  return (
+    <View style={style}>
+      {[...Array(SWITCHES)].map((_, index) => (
+        <Switch key={index} />
+      ))}
+      </View>
+  );
+}
+function ReactNativeSwitchesScreen({route}) {
+
+  useLayoutEffect(() => {
+    alertNavigationTime(route.params.startTime)
+  }, [])
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <View style={style}>
+      {[...Array(SWITCHES)].map((_, index) => (
+        <RNSwitch key={index} />
+      ))}
+      </View>
+  );
+}
+const Stack = createNativeStackNavigator();
+
+function RootStack() {
+  return (
+    <Stack.Navigator initialRouteName="Home">
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="TamaguiNoAnimationSwitchesScreen" component={TamaguiNoAnimationSwitchesScreen} />
+      <Stack.Screen name="TamaguiAnimationSwitchesScreen" component={TamaguiAnimationSwitchesScreen} />
+      <Stack.Screen name="ReactNativeSwitchesScreen" component={ReactNativeSwitchesScreen} />
+    </Stack.Navigator>
   );
 }
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
-
-export default App;
+export default function App() {
+  return (
+    <TamaguiProvider config={appConfig}>
+    <NavigationContainer>
+      <RootStack />
+    </NavigationContainer>
+    </TamaguiProvider>
+  );
+}
