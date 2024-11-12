@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Switch, TamaguiProvider } from 'tamagui';
 import { Switch as RNSwitch } from 'react-native';
 import appConfig from './tamagui.config';
-import { useEffect, useLayoutEffect } from 'react';
+import { useLayoutEffect } from 'react';
 
 
 function HomeScreen({navigation}: {navigation: any}) {
